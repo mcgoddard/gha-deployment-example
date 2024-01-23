@@ -1,0 +1,146 @@
+name: 'Service deployment'
+
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      customer-1:
+        required: true
+        type: boolean
+      customer-2:
+        required: true
+        type: boolean
+
+jobs:
+  release_alpha:
+    name: Release Alpha
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Release Alpha
+        uses: ./.github/actions/release-artifact/
+        with:
+          service: ${{ inputs.service-name }}
+          version: ${{ inputs.version }}
+          source: dev
+          target: alpha
+
+  deploy_qa:
+    name: Deploy QA
+    runs-on: ubuntu-22.04
+    environment: 'qa'
+    needs: release_alpha
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Deploy QA
+        uses: ./.github/actions/deploy-environment/
+        with:
+          service: ${{ inputs.service-name }}
+          version: ${{ inputs.version }}
+          artifact: alpha
+          environment: 'qa'
+
+  release_beta:
+    name: Release Beta
+    runs-on: ubuntu-22.04
+    needs: release_alpha
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Release Beta
+        uses: ./.github/actions/release-artifact/
+        with:
+          service: ${{ inputs.service-name }}
+          version: ${{ inputs.version }}
+          source: alpha
+          target: beta
+
+  deploy_customer1_staging:
+    name: Deploy Customer 1 Staging
+    runs-on: ubuntu-22.04
+    environment: 'customer-1-staging'
+    needs: release_beta
+    if: ${{ inputs.customer-1 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Deploy Customer 1 Staging
+        uses: ./.github/actions/deploy-environment/
+        with:
+          service: ${{ inputs.service-name }}
+          version: ${{ inputs.version }}
+          artifact: beta
+          environment: 'customer-1-staging'
+
+  deploy_customer2_staging:
+    name: Deploy Customer 2 Staging
+    runs-on: ubuntu-22.04
+    environment: 'customer-2-staging'
+    needs: release_beta
+    if: ${{ inputs.customer-2 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Deploy Customer 2 Staging
+        uses: ./.github/actions/deploy-environment/
+        with:
+          service: ${{ inputs.service-name }}
+          version: ${{ inputs.version }}
+          artifact: beta
+          environment: 'customer-2-staging'
+
+  release_final:
+    name: Release Final
+    runs-on: ubuntu-22.04
+    needs: release_beta
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Release Final
+        uses: ./.github/actions/release-artifact/
+        with:
+          service: ${{ inputs.service-name }}
+          version: ${{ inputs.version }}
+          source: beta
+          target: final
+
+  deploy_customer1_production:
+    name: Deploy Customer 1 Production
+    runs-on: ubuntu-22.04
+    environment: 'customer-1-production'
+    needs: release_final
+    if: ${{ inputs.customer-1 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Deploy QA
+        uses: ./.github/actions/deploy-environment/
+        with:
+          service: ${{ inputs.service-name }}
+          version: ${{ inputs.version }}
+          artifact: final
+          environment: 'customer-1-production'
+
+  deploy_customer2_production:
+    name: Deploy Customer 2 Production
+    runs-on: ubuntu-22.04
+    environment: 'customer-2-production'
+    needs: release_final
+    if: ${{ inputs.customer-2 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Deploy QA
+        uses: ./.github/actions/deploy-environment/
+        with:
+          service: ${{ inputs.service-name }}
+          version: ${{ inputs.version }}
+          artifact: final
+          environment: 'customer-2-production'

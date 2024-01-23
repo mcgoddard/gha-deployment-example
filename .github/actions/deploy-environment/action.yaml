@@ -1,0 +1,27 @@
+name: 'Deploy Environment'
+description: 'Deploy a version of a service to an environment'
+inputs:
+  service:
+    description: 'Name of the service to deploy'
+    required: true
+  version:
+    description: 'Version number to deploy'
+    required: true
+  artifact:
+    description: 'Artifact version to publish (e.g. alpha)'
+    required: true
+  environment:
+    description: 'Environment to deploy to (e.g. qa)'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    # Could be an artifactory download
+    - name: Download artifact
+      shell: sh
+      run: echo "Downloading artifact ${{ inputs.service }}/${{ inputs.version }}/${{ inputs.artifact }}"
+    # Could be an ansible playbook
+    - name: Run deployment script
+      shell: sh
+      run: echo "Running deployment script deploy-${{ inputs.service }}.yaml for environment ${{ inputs.environment }}"

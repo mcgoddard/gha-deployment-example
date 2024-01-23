@@ -1,0 +1,22 @@
+name: 'Release Artifact'
+description: 'Promote an artifact release'
+inputs:
+  service:
+    description: 'Name of the service to deploy'
+    required: true
+  version:
+    description: 'Version number to release'
+    required: true
+  source:
+    description: 'Artifact version to source from (e.g. alpha)'
+    required: true
+  target:
+    description: 'Artifact version to publish (e.g. beta)'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Copy artifact
+      shell: sh
+      run: echo "Copying artifact ${{ inputs.service }}/${{ inputs.version }}/${{ inputs.source }} to ${{ inputs.service }}/${{ inputs.version }}/${{ inputs.target }}"
