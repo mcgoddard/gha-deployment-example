@@ -7,7 +7,7 @@ on:
 
 jobs:
   service-1-deployment:
-    uses: ./.github/workflows/service_deployment.yaml
+    uses: ./.github/workflows/service-deployment.yaml
     with:
       service-name: service-1
       version: v1.0
@@ -15,7 +15,7 @@ jobs:
       customer-2: true
 
   service-2-deployment:
-    uses: ./.github/workflows/service_deployment.yaml
+    uses: ./.github/workflows/service-deployment.yaml
     with:
       service-name: service-2
       version: v3.0
