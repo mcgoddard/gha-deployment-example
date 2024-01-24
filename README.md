@@ -18,7 +18,7 @@ from a centralised deployments repo.
 
 Entry point workflow for a push to prod. Contains a job which activates the reuseable workflow `service-deployment.yaml` for each service you want to deploy.
 
-### service-deployment
+### service-deployment
 
 Control flow for a single service. Makes use of the `deployment-environment` and `release-artifact` custom actions for consistent deployments through your Path to Live. Inputs allow configuration per customer, so if you have some services that are customer specific it will ignore those environments. It also enforces that an artifact has been produced for a deployment before it will let you perform that deployment. Deployments are gated on environments.
 
